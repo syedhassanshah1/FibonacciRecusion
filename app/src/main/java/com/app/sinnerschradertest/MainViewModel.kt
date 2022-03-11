@@ -46,7 +46,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
                     withContext(Dispatchers.Main) { // returning the result from the Dispatchers.Main so that the sequence is persisted as compared to send it from background thread using PostValue
                         fibonacciResult.value = ("F($index): $result")
                     }
-//                    Thread.sleep(100)
+                    Thread.sleep(100)
                     index++
                 }
             }
