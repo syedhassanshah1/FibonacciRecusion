@@ -1,38 +1,41 @@
 package com.app.sinnerschradertest
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
 @HiltViewModel
 class MainViewModel @Inject constructor() : ViewModel() {
-     var fabonacciItems = flow {
-        var index: ULong = 0u
-        while (index <= ULong.MAX_VALUE) {
-            val result = fibonacciRecursiveTail(index)
+    var fibonacciItems = flow {
+        var index = 0
+        try {
+            while (true) {
+                val result = fibonacciRecursiveTail(index)
 //                    val result = fibonacciIterative(index)
 //                    val result = fibonacciRecursive(index)
-//            withContext(Dispatchers.Main) { // returning the result from the Dispatchers.Main so that the sequence is persisted as compared to send it from background thread using PostValue
-//                fibonacciResult.value = ("F($index): $result")
-//            }
+
             Thread.sleep(100)
-            emit("F($index): $result")
-            index++
+                emit("F($index): $result")
+                index++
+            }
+        }catch (e: IllegalStateException){
+
         }
+
     }.flowOn(Dispatchers.IO)
 
-    val fibonacciResult = MutableLiveData<String>()
-    private tailrec fun fibonacciRecursiveTail(n: ULong, a: ULong = 0u, b: ULong = 1u): ULong =
-            if (n < 1u) a else fibonacciRecursiveTail(n - 1u, b, a + b) //since it is a tail recursive function the complexity for it is O(n)
-
+    private tailrec fun fibonacciRecursiveTail(n: Int, a: ULong = 0u, b: ULong = 1u): ULong {
+            if (n < 1) {
+                return a
+            } else {
+                if (a > ULong.MAX_VALUE - b) throw IllegalStateException()
+               return fibonacciRecursiveTail(n - 1, b, a + b)
+            } //since it is a tail recursive function the complexity for it is O(n)
+    }
     private fun fibonacciRecursive(n: ULong): ULong = if (n < 2u) n else fibonacciRecursive(n - 1u) + fibonacciRecursive(n - 2u) // As this is a recursive function the complexity is O(n^2)
 
     // As this is a iterative function the complexity is O(n)
@@ -50,22 +53,5 @@ class MainViewModel @Inject constructor() : ViewModel() {
         }
 
         return result
-    }
-    fun initFibonacciSeries() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                var index: ULong = 0u
-                while (index <= ULong.MAX_VALUE) {
-                    val result = fibonacciRecursiveTail(index)
-//                    val result = fibonacciIterative(index)
-//                    val result = fibonacciRecursive(index)
-                    withContext(Dispatchers.Main) { // returning the result from the Dispatchers.Main so that the sequence is persisted as compared to send it from background thread using PostValue
-                        fibonacciResult.value = ("F($index): $result")
-                    }
-                    Thread.sleep(100)
-                    index++
-                }
-            }
-        }
     }
 }

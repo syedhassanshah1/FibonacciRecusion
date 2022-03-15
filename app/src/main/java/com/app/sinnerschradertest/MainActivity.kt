@@ -23,10 +23,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        
+
         binding.rvFibonacciSeries.adapter = fibonacciItemAdapter
         this.lifecycleScope.launchWhenStarted {
-            mainViewModel.fabonacciItems.onEach {
+            mainViewModel.fibonacciItems.onEach {
                 fibonacciItems.add(it)
                 fibonacciItemAdapter.notifyItemInserted(fibonacciItems.size - 1)
             }.launchIn(this)
