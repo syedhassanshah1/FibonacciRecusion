@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -12,6 +14,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor() : ViewModel() {
+     var fabonacciItems = flow {
+        var index: ULong = 0u
+        while (index <= ULong.MAX_VALUE) {
+            val result = fibonacciRecursiveTail(index)
+//                    val result = fibonacciIterative(index)
+//                    val result = fibonacciRecursive(index)
+//            withContext(Dispatchers.Main) { // returning the result from the Dispatchers.Main so that the sequence is persisted as compared to send it from background thread using PostValue
+//                fibonacciResult.value = ("F($index): $result")
+//            }
+            Thread.sleep(100)
+            emit("F($index): $result")
+            index++
+        }
+    }.flowOn(Dispatchers.IO)
+
     val fibonacciResult = MutableLiveData<String>()
     private tailrec fun fibonacciRecursiveTail(n: ULong, a: ULong = 0u, b: ULong = 1u): ULong =
             if (n < 1u) a else fibonacciRecursiveTail(n - 1u, b, a + b) //since it is a tail recursive function the complexity for it is O(n)
@@ -34,7 +51,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
         return result
     }
-
     fun initFibonacciSeries() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

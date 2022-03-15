@@ -4,8 +4,12 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import com.app.sinnerschradertest.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -19,11 +23,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        mainViewModel.initFibonacciSeries()
+        
         binding.rvFibonacciSeries.adapter = fibonacciItemAdapter
-        mainViewModel.fibonacciResult.observe(this, {
-            fibonacciItems.add(it)
-            fibonacciItemAdapter.notifyItemInserted(fibonacciItems.size - 1)
-        })
+        this.lifecycleScope.launchWhenStarted {
+            mainViewModel.fabonacciItems.onEach {
+                fibonacciItems.add(it)
+                fibonacciItemAdapter.notifyItemInserted(fibonacciItems.size - 1)
+            }.launchIn(this)
+        }
     }
 }
